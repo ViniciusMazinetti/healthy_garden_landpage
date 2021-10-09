@@ -1,0 +1,30 @@
+@charset "UTF-8";
+
+.content{
+	background-color: #08B662;
+}
+
+
+.mainTitle{
+	font-size: 3rem;
+	color: #FEFEFE;
+}
+
+.mainSubTitle{
+	color:#FEFEFE;
+}
+
+.screens{
+	margin: 1rem;
+}
+
+.justification .content{
+	margin: 0.5rem 3rem 0.5rem 3rem;
+	text-align: justify;
+	font-size: 1.2rem;
+	
+}
+
+.title{
+	font-weight: bold;
+}
