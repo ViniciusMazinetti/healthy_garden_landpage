@@ -1,0 +1,77 @@
+pipeline {
+    agent any
+
+        stages{
+            
+            stage("Iniciando Processo") {
+                steps {
+                    echo "Iniciando..."
+                }
+            }
+            
+            stage("Recuperando Código Fonte") {
+                steps {
+                    git 'https://github.com/ViniciusMazinetti/healthy_garden_landpage.git'
+                }
+            }
+            
+            stage("Iniciando Build e analysis") {
+                steps {
+                    echo "Iniciando processo de build e análise..."
+                }
+            }
+            
+            stage("SonarQube analysis") {
+                steps {
+                    withSonarQubeEnv('SonarQube'){
+                        sh '/opt/maven/bin/mvn clean package sonar:sonar'
+                    }
+                }
+            }
+            
+            stage("Iniciando processo de deploy") {
+                steps {
+                    echo "Iniciando deploy..."
+                }
+            }
+            
+            stage('Confirmar Deploy') {
+                steps {
+                    script {
+                        timeout(time: 2, unit: "HOURS") {
+                            env.userInput = input(
+                                id: 'userInput', message: 'Aprova o Deploy ?', parameters: [
+                                [$class: 'TextParameterDefinition', defaultValue: 'Não', description: 'Realizar Deploy ?', name: 'Executar'] ] )
+                            echo (userInput)
+                        }
+                    }
+                }
+            }
+            
+            stage("Deploy Realizado") {
+                when {
+                    expression {"${env.userInput}" == "Sim" }
+                }
+                
+                steps {
+                    deploy adapters: [tomcat9(credentialsId: '1ae31097-ae96-43ed-982f-d4af12e5b44c', path: '', url: 'http://localhost:8080')], contextPath: 'Healthy_Garden_Page', war: '**/*.war'
+                    echo "Deploy Realizado! Acesse o endereço do seu tomcat para ver sua aplicação"
+                }
+            }
+            
+            stage("Deploy Não Realizado") {
+                when {
+                    expression {"${env.userInput}" == "Não" }
+                }
+                steps {
+                    echo "deploy não feito"
+                }
+            }
+            
+            stage("Fim do Processo") {
+                steps {
+                    echo "Processo Finalizado!"
+                }
+            }
+        }
+}
